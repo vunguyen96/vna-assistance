@@ -1,0 +1,9 @@
+# vna-assistance Python dependencies.
+# The CLI runs with the standard library alone; the packages below are optional
+# but recommended.
+
+# Better natural-language date parsing (e.g. "next wednesday 3pm").
+dateparser>=1.2.0
+
+# Only needed if you enable the OpenAI extraction fallback (OPENAI_API_KEY).
+# openai>=1.0.0
