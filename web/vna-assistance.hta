@@ -20,19 +20,25 @@
   <style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body {
+      width: 100%; height: 100%; margin: 0; padding: 0;
+    }
     body {
-      margin: 0;
       font: 15px/1.5 "Segoe UI", system-ui, Roboto, sans-serif;
       background: #0f1115;
       color: #e6e8ec;
-      overflow: hidden;
+      padding: 20px;
     }
     .app {
-      max-width: 820px; margin: 0 auto; padding: 24px 16px 16px;
-      height: 100%; display: flex; flex-direction: column;
+      width: 100%; height: 100%; margin: 0; padding: 24px;
+      display: flex; flex-direction: column; box-sizing: border-box;
+    }
+    .app.form-open {
+      width: 100%; max-width: none;
+      margin: 0; box-sizing: border-box;
     }
     .topbar {
+      width: 100%; box-sizing: border-box;
       display: flex; align-items: flex-start; justify-content: space-between;
       gap: 16px; margin-bottom: 16px; flex-shrink: 0;
     }
@@ -52,6 +58,37 @@
       border-radius: 12px; padding: 14px 16px;
     }
     .task-form.show { display: block; }
+    .workspace {
+      width: 100%; max-width: 820px; margin: 0 auto; box-sizing: border-box;
+      flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+    }
+    .workspace.form-open {
+      width: 100%; max-width: none; display: flex; flex-direction: row;
+      overflow: hidden; box-sizing: border-box;
+    }
+    .workspace.form-open .task-form {
+      display: block; order: 2; flex: 0 0 48%; width: 48%;
+      height: auto; align-self: flex-start; margin: 0 0 0 20px;
+      min-width: 0; box-sizing: border-box;
+    }
+    .workspace.form-open .task-list-area {
+      order: 1; flex: 1 1 auto; width: auto; min-width: 0; height: 100%;
+    }
+    .task-list-area {
+      min-width: 0; min-height: 0; display: flex; flex-direction: column;
+    }
+    .panel-title {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin: 0 0 12px; flex-shrink: 0;
+    }
+    .panel-title h2 {
+      margin: 0; font-size: 18px; line-height: 1.3;
+    }
+    .form-fields {
+      width: 100%; box-sizing: border-box;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 14px;
+    }
     .task-form .field { margin-bottom: 10px; }
     .task-form label {
       display: block; font-size: 13px; color: #8b93a1; margin-bottom: 4px;
@@ -63,7 +100,22 @@
     .task-form input[type="text"]:focus, .task-form textarea:focus {
       outline: none; border-color: #4c8bf5;
     }
+    .due-picker { display: flex; gap: 8px; align-items: center; }
+    .due-picker select {
+      flex: 1; min-width: 0; background: #1a1d24; color: #e6e8ec;
+      border: 1px solid #2a2e37; border-radius: 8px; padding: 8px 10px; font: inherit;
+    }
+    .due-picker select:focus {
+      outline: none; border-color: #4c8bf5;
+    }
+    .due-picker .due-date { flex: 2; }
+    .due-picker .due-clear { color: #8b93a1; white-space: nowrap; }
     .task-form textarea { resize: vertical; min-height: 60px; }
+    .form-status {
+      display: none; color: #ff5c5c; margin: 0 0 10px;
+      font-size: 13px;
+    }
+    .form-status.show { display: block; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
     .chip {
       padding: 4px 10px; font-size: 13px; border-radius: 999px;
@@ -76,6 +128,38 @@
     .chip-hint { color: #8b93a1; font-size: 12px; }
     .form-actions { display: flex; gap: 8px; margin-top: 6px; }
     .form-actions .ghost { color: #8b93a1; }
+    #createSimpleBtn { background: #3ecf8e; border-color: #3ecf8e; color: #0f1115; font-weight: 600; }
+    #createSimpleBtn:hover { background: #5be7a5; border-color: #5be7a5; }
+    .form-progress {
+      display: none; margin: 10px 0 0; position: relative; padding-right: 34px;
+    }
+    .form-progress.show { display: block; }
+    .form-progress-info {
+      display: flex; justify-content: space-between; gap: 12px;
+      color: #8b93a1; font-size: 12px; margin-bottom: 4px;
+    }
+    .form-progress-track {
+      height: 5px; background: #2a2e37; border-radius: 999px; overflow: hidden;
+    }
+    .form-progress-bar {
+      width: 0; height: 100%; background: #3ecf8e; border-radius: 999px;
+      -ms-transition: width .2s ease; transition: width .2s ease;
+    }
+    .form-progress-cancel {
+      position: absolute; right: 0; bottom: -7px; width: 26px; height: 26px;
+      padding: 0; border: 0; background: transparent; color: #ff5c5c;
+      font-size: 22px; line-height: 22px;
+    }
+    .form-progress-cancel:hover { color: #ff8585; border: 0; }
+    @media (max-width: 1200px) {
+      .workspace { max-width: none; }
+      .workspace.form-open { display: flex; flex-direction: column; gap: 0; overflow: visible; width: 100%; }
+      .workspace.form-open .task-form {
+        order: 1; flex: 0 0 auto; height: auto; width: 100%;
+        margin: 0 0 12px 0; overflow: visible;
+      }
+      .workspace.form-open .task-list-area { order: 2; flex: 0 0 auto; width: auto; height: auto; min-height: 0; margin-top: 10px }
+    }
     .tabs {
       display: flex; gap: 4px; margin: 0 0 12px;
       border-bottom: 1px solid #2a2e37; flex-shrink: 0;
@@ -134,6 +218,7 @@
     .card {
       background: #1a1d24; border: 1px solid #2a2e37; border-left-width: 4px;
       border-radius: 10px; padding: 14px 16px;
+      cursor: pointer;
     }
     .card.u-urgent, .card.u-asap { border-left-color: #ff5c5c; }
     .card.u-high { border-left-color: #ff9f43; }
@@ -157,14 +242,30 @@
     }
     .timer .when-day { color: #c7ccd6; }
     .countdown {
+      margin-left: 12px;
       font-variant-numeric: tabular-nums; font-weight: 600; color: #6fae6f;
     }
     .countdown.soon { color: #ff9f43; }
     .countdown.over { color: #ff5c5c; }
+    .task-info-line {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 0 10px; margin-bottom: 4px;
+    }
+    .task-info-line .timer { margin-bottom: 0; }
+    .task-info-line .badges { margin-bottom: 0; }
     .meta { display: grid; grid-template-columns: 96px 1fr; gap: 4px 12px; font-size: 14px; margin: 0; }
     .meta dt { color: #8b93a1; }
     .meta dd { margin: 0; }
     .meta dd.desc { white-space: pre-wrap; word-break: break-word; line-height: 1.4; }
+    .description {
+      display: none; margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid #2a2e37; color: #e6e8ec;
+      white-space: pre-wrap; word-break: break-word; line-height: 1.4;
+    }
+    .description.show { display: block; }
+    .description-label {
+      display: block; color: #8b93a1; font-size: 13px; margin-bottom: 4px;
+    }
     .ask { color: #ff9f43; font-weight: 600; }
     .empty { text-align: center; color: #8b93a1; padding: 40px 0; }
     .toast-wrap {
@@ -232,40 +333,72 @@
       </div>
       <div class="actions">
         <button id="addTaskBtn" type="button" title="Add a new task">+ Add task</button>
-        <button id="refreshBtn" type="button" title="Re-read the CSV">Refresh</button>
       </div>
     </div>
+    <div id="workspace" class="workspace">
     <div id="taskForm" class="task-form">
-      <div class="field">
-        <label for="taskSummary">Summary</label>
-        <input id="taskSummary" type="text" placeholder="Task summary" />
+      <div class="panel-title">
+        <h2>Task Creation Form</h2>
       </div>
-      <div class="field">
-        <label>Tags</label>
-        <div id="tagChips" class="chips"></div>
-        <input id="customTags" type="text" placeholder="Add tags" />
+      <p id="formStatus" class="form-status"></p>
+      <div class="form-fields">
+        <div class="field">
+          <label for="taskSummary">Summary</label>
+          <input id="taskSummary" type="text" placeholder="Task summary" />
+        </div>
+        <div class="field">
+          <label>Tags</label>
+          <div id="tagChips" class="chips"></div>
+          <input id="customTags" type="text" placeholder="Add tags" />
+        </div>
+        <div class="field">
+          <label for="taskDesc">Description</label>
+          <textarea id="taskDesc" rows="3" placeholder="Details and reminders"></textarea>
+        </div>
+        <div class="field">
+          <label for="taskDue">Due date &amp; time</label>
+          <div class="due-picker">
+            <select id="taskDueDate" class="due-date" aria-label="Due date">
+              <option value="">Choose date</option>
+            </select>
+            <select id="taskDueHour" aria-label="Due hour">
+              <option value="">Hour</option>
+            </select>
+            <select id="taskDueMinute" aria-label="Due minute">
+              <option value="">Minute</option>
+            </select>
+            <button id="clearDueBtn" class="due-clear" type="button">Clear</button>
+          </div>
+          <input id="taskDue" type="hidden" />
+        </div>
       </div>
-      <div class="field">
-        <label for="taskDesc">Description</label>
-        <textarea id="taskDesc" rows="3" placeholder="Details and reminders"></textarea>
-      </div>
-      <div class="field">
-        <label for="taskDue">Due date &amp; time (optional)</label>
-        <input id="taskDue" type="text" placeholder="Due date &amp; time" />
+      <div id="formProgress" class="form-progress">
+        <div class="form-progress-info">
+          <span id="formProgressCommand">Preparing...</span>
+          <span id="formProgressPercent">0%</span>
+        </div>
+        <div class="form-progress-track"><div id="formProgressBar" class="form-progress-bar"></div></div>
+        <button id="cancelTaskBtn" class="form-progress-cancel" type="button" title="Cancel creation" aria-label="Cancel creation">&#215;</button>
       </div>
       <div class="form-actions">
+        <button id="createSimpleBtn" type="submit" title="Create the task directly with the local parser (no Copilot CLI)">Create simple task</button>
         <button id="createTaskBtn" type="button">Create task</button>
-        <button id="createSimpleBtn" type="button" class="ghost" title="Create the task directly with the local parser (no Copilot CLI)">Create simple task</button>
-        <button id="cancelTaskBtn" type="button" class="ghost">Cancel</button>
+        <button id="closeTaskFormBtn" type="button" class="ghost">Close</button>
       </div>
     </div>
-    <div class="tabs">
-      <button id="tabActive" class="tab active" type="button">Active</button>
-      <button id="tabDone" class="tab" type="button">Done</button>
+    <div class="task-list-area">
+      <div class="panel-title">
+        <h2>Task List</h2>
+        <button id="refreshBtn" type="button" title="Re-read the CSV">Refresh</button>
+      </div>
+      <div class="tabs">
+        <button id="tabActive" class="tab active" type="button">Active</button>
+        <button id="tabDone" class="tab" type="button">Done</button>
+      </div>
+      <p id="status" class="status"></p>
+      <ul id="list" class="list"></ul>
     </div>
-    <div id="progress" class="progress"><div class="bar"></div></div>
-    <p id="status" class="status"></p>
-    <ul id="list" class="list"></ul>
+    </div>
   </div>
   <div id="toasts" class="toast-wrap"></div>
   <div id="dueBadge" class="due-badge" title="Click to dismiss">
@@ -351,6 +484,9 @@
   var currentTab = "active";   // "active" | "done"
   var lastRows = [];           // last-loaded rows, reused when switching tabs
   var noteTimer = null;        // pending add-note poll timer
+  var noteExecPid = 0;         // running task creation process id
+  var progressTimer = null;
+  var copilotAvailable = false;
   var collapsed = {};          // group-key -> true when a group is collapsed
   var bucketState = {};        // task-id -> last-known active bucket (0..3)
   var dueAlertIds = {};        // task-id -> true for tasks in the due badge
@@ -418,6 +554,12 @@
   function shellRun(cmd, visible) {
     var shell = new ActiveXObject("WScript.Shell");
     return shell.Run(cmd, visible ? 1 : 0, true);
+  }
+
+  function detectCopilotCli() {
+    try {
+      return shellRun('cmd.exe /d /c where copilot >nul 2>&1', false) === 0;
+    } catch (e) { return false; }
   }
 
   function fileExists(path) {
@@ -868,9 +1010,23 @@
     btns.appendChild(delBtn);
     head.appendChild(btns);
     li.appendChild(head);
+    li.onclick = function (e) {
+      e = e || window.event;
+      var target = e.target || e.srcElement;
+      if (target && (target.tagName === "BUTTON" || target.parentNode && target.parentNode.tagName === "BUTTON")) {
+        return;
+      }
+      var description = document.getElementById("description-" + String(row.id));
+      if (description) {
+        description.className = description.className.indexOf("show") >= 0
+          ? "description"
+          : "description show";
+      }
+    };
 
     // Live timer line under the title: the due day/time plus a real-time
     // countdown. Shown only for active tasks that have a due (or recurrence).
+    var infoLine = el("div", "task-info-line");
     if (!done) {
       var pd = parseDue(row, new Date());
       if (pd) {
@@ -879,7 +1035,7 @@
         timer.appendChild(document.createTextNode(" "));
         var cd = el("span", "countdown", "");
         timer.appendChild(cd);
-        li.appendChild(timer);
+        infoLine.appendChild(timer);
         registerTimer(cd, pd.date.getTime(), pd.hasTime);
       }
     }
@@ -893,7 +1049,8 @@
     if (trim(row.project) !== "") badges.appendChild(el("span", "badge", row.project));
     var tags = tagsOf(row);
     for (var ti = 0; ti < tags.length; ti++) badges.appendChild(el("span", "badge tag", tags[ti]));
-    li.appendChild(badges);
+    infoLine.appendChild(badges);
+    li.appendChild(infoLine);
 
     // Meta: only rows that carry real information (skip n/a and defaults).
     var dl = el("dl", "meta");
@@ -904,8 +1061,14 @@
     var how = howToDo(row);
     if (!how.ask) addMeta(dl, "How", how.text);
     var desc = descOf(row);
-    if (desc !== "") addMeta(dl, "Description", desc, "desc");
     if (dl.childNodes.length > 0) li.appendChild(dl);
+    if (desc !== "") {
+      var description = el("div", "description", desc);
+      description.id = "description-" + String(row.id);
+      var descriptionLabel = el("span", "description-label", "Description");
+      description.insertBefore(descriptionLabel, description.firstChild);
+      li.appendChild(description);
+    }
     return li;
   }
 
@@ -1103,8 +1266,43 @@
     }, 3600);
   }
 
-  function showProgress() { document.getElementById("progress").className = "progress show"; }
-  function hideProgress() { document.getElementById("progress").className = "progress"; }
+  function setFormProgress(percent, command) {
+    document.getElementById("formProgressCommand").innerHTML = command;
+    document.getElementById("formProgressPercent").innerHTML = String(percent) + "%";
+    document.getElementById("formProgressBar").style.width = String(percent) + "%";
+  }
+  function showProgress(command) {
+    document.getElementById("formProgress").className = "form-progress show";
+    setFormProgress(5, command);
+  }
+  function hideProgress() {
+    document.getElementById("formProgress").className = "form-progress";
+    if (progressTimer) { window.clearInterval(progressTimer); progressTimer = null; }
+  }
+
+  function progressAverageKey(useCo) {
+    return "vna-assistance-create-ms-" + (useCo ? "copilot" : "python");
+  }
+  function progressAverage(useCo) {
+    var fallback = useCo ? 60000 : 3000;
+    try {
+      var value = parseInt(window.localStorage.getItem(progressAverageKey(useCo)), 10);
+      return value > 0 ? value : fallback;
+    } catch (e) { return fallback; }
+  }
+  function recordProgressDuration(useCo, elapsedMs) {
+    try {
+      var key = progressAverageKey(useCo);
+      var previous = progressAverage(useCo);
+      var blended = Math.round(previous * 0.7 + elapsedMs * 0.3);
+      window.localStorage.setItem(key, String(blended));
+    } catch (e) {}
+  }
+  function formatElapsed(ms) {
+    var seconds = Math.floor(ms / 1000);
+    if (seconds < 60) return seconds + "s";
+    return Math.floor(seconds / 60) + "m " + (seconds % 60) + "s";
+  }
 
   function load() {
     var path = csvPath();
@@ -1189,12 +1387,17 @@
   }
 
   function showTaskForm() {
+    setFormStatus("");
     renderTagChips();
+    document.getElementsByClassName("app")[0].className = "app form-open";
+    document.getElementById("workspace").className = "workspace form-open";
     document.getElementById("taskForm").className = "task-form show";
     document.getElementById("taskSummary").focus();
   }
   function hideTaskForm() {
     document.getElementById("taskForm").className = "task-form";
+    document.getElementsByClassName("app")[0].className = "app";
+    document.getElementById("workspace").className = "workspace";
   }
   function toggleTaskForm() {
     var shown = document.getElementById("taskForm").className.indexOf("show") >= 0;
@@ -1205,6 +1408,10 @@
     document.getElementById("taskDesc").value = "";
     document.getElementById("customTags").value = "";
     document.getElementById("taskDue").value = "";
+    setFormStatus("");
+    document.getElementById("taskDueDate").selectedIndex = 0;
+    document.getElementById("taskDueHour").selectedIndex = 0;
+    document.getElementById("taskDueMinute").selectedIndex = 0;
     var chips = document.getElementById("tagChips").getElementsByTagName("button");
     for (var i = 0; i < chips.length; i++) chips[i].className = "chip";
   }
@@ -1212,13 +1419,70 @@
     document.getElementById("taskSummary").disabled = dis;
     document.getElementById("taskDesc").disabled = dis;
     document.getElementById("customTags").disabled = dis;
-    document.getElementById("taskDue").disabled = dis;
-    document.getElementById("createTaskBtn").disabled = dis;
+    document.getElementById("taskDueDate").disabled = dis;
+    document.getElementById("taskDueHour").disabled = dis;
+    document.getElementById("taskDueMinute").disabled = dis;
+    document.getElementById("clearDueBtn").disabled = dis;
+    document.getElementById("createTaskBtn").disabled = dis || !copilotAvailable;
     document.getElementById("createSimpleBtn").disabled = dis;
-    document.getElementById("cancelTaskBtn").disabled = dis;
+    document.getElementById("cancelTaskBtn").disabled = false;
+    document.getElementById("closeTaskFormBtn").disabled = dis;
     document.getElementById("addTaskBtn").disabled = dis;
     var chips = document.getElementById("tagChips").getElementsByTagName("button");
     for (var i = 0; i < chips.length; i++) chips[i].disabled = dis;
+  }
+
+  function setFormStatus(msg) {
+    var status = document.getElementById("formStatus");
+    if (!status) return;
+    status.innerHTML = "";
+    if (msg !== "") {
+      status.appendChild(document.createTextNode(msg));
+      status.className = "form-status show";
+    } else {
+      status.className = "form-status";
+    }
+  }
+
+  function addOption(select, value, label) {
+    var option = document.createElement("option");
+    option.value = value;
+    option.appendChild(document.createTextNode(label));
+    select.appendChild(option);
+  }
+
+  function initDuePicker() {
+    var dateSelect = document.getElementById("taskDueDate");
+    var hourSelect = document.getElementById("taskDueHour");
+    var minuteSelect = document.getElementById("taskDueMinute");
+    var today = new Date();
+    var i, d, value, label;
+
+    for (i = 0; i <= 730; i++) {
+      d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+      value = d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+      label = value;
+      addOption(dateSelect, value, label);
+    }
+    for (i = 0; i < 24; i++) addOption(hourSelect, pad2(i), pad2(i));
+    for (i = 0; i < 60; i += 5) addOption(minuteSelect, pad2(i), pad2(i));
+
+    var updateDueValue = function () {
+      var date = dateSelect.value;
+      var hour = hourSelect.value;
+      var minute = minuteSelect.value;
+      document.getElementById("taskDue").value =
+        date !== "" && hour !== "" && minute !== "" ? date + "T" + hour + ":" + minute : "";
+    };
+    dateSelect.onchange = updateDueValue;
+    hourSelect.onchange = updateDueValue;
+    minuteSelect.onchange = updateDueValue;
+    document.getElementById("clearDueBtn").onclick = function () {
+      dateSelect.selectedIndex = 0;
+      hourSelect.selectedIndex = 0;
+      minuteSelect.selectedIndex = 0;
+      updateDueValue();
+    };
   }
 
   // Concatenate the three form fields into one note text for Copilot / the CLI.
@@ -1237,10 +1501,15 @@
     var summaryEl = document.getElementById("taskSummary");
     var summary = trim(summaryEl.value);
     if (summary === "") {
-      setStatus("Enter a task summary first.", true);
+      setFormStatus("Enter a task summary first.");
       summaryEl.focus();
       return;
     }
+    if (!simple && !copilotAvailable) {
+      setFormStatus("The Copilot CLI is required for this action.");
+      return;
+    }
+    setFormStatus("");
     var tags = collectSelectedTags();
     var desc = trim(document.getElementById("taskDesc").value);
     var due = trim(document.getElementById("taskDue").value);
@@ -1249,7 +1518,7 @@
 
   // --- Actions: shell out to the CLI / Copilot, then reload -----------------
 
-  // Stage the concatenated task text and run it in the background worker.
+  // Stage the concatenated task text and run it as a cancellable background process.
   // opts.simple === true forces the local Python CLI directly (no Copilot).
   // opts.due, when set, is passed to the CLI (--due) and mentioned to Copilot;
   // the CLI parses it (ISO or natural language) and it overrides any parsed date.
@@ -1262,15 +1531,9 @@
     try { writeFileUtf8(p.input, text); }
     catch (e) { setStatus("Could not stage task (" + (e.message || e) + ").", true); return; }
 
-    // Drop any stale result flag from a previous run, and make sure the
-    // dedicated worker shell is up (it usually already is from app start).
     if (noteTimer) { window.clearTimeout(noteTimer); noteTimer = null; }
     deleteFileQuiet(p.flag);
-    ensureWorker();
 
-    // Build the job. It runs inside the worker (cwd already = PROJECT_DIR) and
-    // writes OK / ERR to the flag file on completion so the (non-blocking) UI
-    // can poll for the result. The Copilot path falls back to the Python CLI.
     var dueArg = due !== "" ? ' --due "' + due + '"' : '';
     var pyRun = PYTHON + ' ' + CLI + ' note --file "' + p.input + '"' + dueArg;
     var coRun = 'copilot --allow-all-tools --allow-all-paths -p ' +
@@ -1281,34 +1544,39 @@
                 ' do not ask questions."';
     var okFlag = ' && echo OK>"' + p.flag + '"';
     var errFlag = ' || echo ERR>"' + p.flag + '"';
-    var job = useCo
+    var command = useCo
       ? '(' + coRun + okFlag + ') || (' + pyRun + okFlag + ')' + errFlag
       : '(' + pyRun + okFlag + ')' + errFlag;
 
-    // Stage the job atomically: write a temp file, then rename it into place so
-    // the worker never sees a half-written job.
-    try {
-      writeFileUtf8(p.jobTmp, job + "\r\n");
-      var fso = new ActiveXObject("Scripting.FileSystemObject");
-      if (fso.FileExists(p.job)) fso.DeleteFile(p.job);
-      fso.MoveFile(p.jobTmp, p.job);
-    } catch (e) {
-      setStatus("Could not queue add-task (" + (e.message || e) + ").", true);
-      toast("Add task failed to start", "error");
-      return;
-    }
-
     setFormDisabled(true);
-    showProgress();
+    showProgress(useCo ? "Copilot CLI" : "Python CLI");
     setStatus(useCo
       ? "Adding task in the background via Copilot CLI\u2026 this can take a minute."
       : "Adding task in the background\u2026");
-
-    pollNoteResult(p.flag, 0);
+    try {
+      noteExecPid = new ActiveXObject("WScript.Shell").Run(
+        'cmd.exe /d /s /c "cd /d ""' + PROJECT_DIR + '"" && ' + command + '"',
+        0, false);
+      var startedAt = (new Date()).getTime();
+      var expectedMs = progressAverage(useCo);
+      progressTimer = window.setInterval(function () {
+        var elapsed = (new Date()).getTime() - startedAt;
+        var pct = Math.min(95, Math.max(5, Math.round(elapsed / expectedMs * 85)));
+        setFormProgress(pct, (useCo ? "Copilot CLI" : "Python CLI") +
+          " (" + formatElapsed(elapsed) + ")");
+      }, 1000);
+      pollNoteResult(p.flag, 0, useCo, startedAt);
+    } catch (e) {
+      noteExecPid = 0;
+      hideProgress();
+      setFormDisabled(false);
+      setStatus("Could not start task creation (" + (e.message || e) + ").", true);
+      toast("Add task failed to start", "error");
+    }
   }
 
   // Poll for the add-task result flag while the loading bar animates.
-  function pollNoteResult(flagFile, elapsedMs) {
+  function pollNoteResult(flagFile, elapsedMs, useCo, startedAt) {
     var STEP = 700, MAX = 10 * 60 * 1000; // give up after 10 minutes
     noteTimer = window.setTimeout(function () {
       noteTimer = null;
@@ -1316,7 +1584,11 @@
         var txt = "";
         try { txt = readFileUtf8(flagFile); } catch (e) {}
         deleteFileQuiet(flagFile);
+        var totalMs = (new Date()).getTime() - startedAt;
+        recordProgressDuration(useCo, totalMs);
+        setFormProgress(100, "Completed (" + formatElapsed(totalMs) + ")");
         hideProgress();
+        noteExecPid = 0;
         setFormDisabled(false);
         if (trim(txt).slice(0, 2) === "OK") {
           resetTaskForm();
@@ -1330,14 +1602,42 @@
         return;
       }
       if (elapsedMs >= MAX) {
+        if (noteExecPid) {
+          try {
+            new ActiveXObject("WScript.Shell").Run(
+              'cmd.exe /d /c taskkill /pid ' + String(noteExecPid) + ' /t /f',
+              0, true);
+          } catch (e) {}
+          noteExecPid = 0;
+        }
         hideProgress();
         setFormDisabled(false);
         setStatus("Add task timed out after 10 minutes.", true);
         toast("Add task timed out", "error");
         return;
       }
-      pollNoteResult(flagFile, elapsedMs + STEP);
+      pollNoteResult(flagFile, elapsedMs + STEP, useCo, startedAt);
     }, STEP);
+  }
+
+  function cancelTaskCreation() {
+    if (noteTimer) { window.clearTimeout(noteTimer); noteTimer = null; }
+    var p = workerPaths();
+    deleteFileQuiet(p.flag);
+    if (noteExecPid) {
+      try {
+        new ActiveXObject("WScript.Shell").Run(
+          'cmd.exe /d /c taskkill /pid ' + String(noteExecPid) + ' /t /f',
+          0, true);
+      } catch (e) {
+      }
+      noteExecPid = 0;
+    }
+    hideProgress();
+    setFormDisabled(false);
+    setFormStatus("Task creation cancelled.");
+    setStatus("Task creation cancelled.");
+    toast("Task creation cancelled", "error");
   }
 
   // Mark a task done. Recurring tasks use --today so they remind next iteration.
@@ -1403,17 +1703,24 @@
     document.getElementById("addTaskBtn").onclick = toggleTaskForm;
     document.getElementById("createTaskBtn").onclick = function () { submitTask(false); };
     document.getElementById("createSimpleBtn").onclick = function () { submitTask(true); };
-    document.getElementById("cancelTaskBtn").onclick = hideTaskForm;
+    document.getElementById("cancelTaskBtn").onclick = cancelTaskCreation;
+    document.getElementById("closeTaskFormBtn").onclick = hideTaskForm;
     document.getElementById("tabActive").onclick = function () { switchTab("active"); };
     document.getElementById("tabDone").onclick = function () { switchTab("done"); };
     document.getElementById("dueBadge").onclick = clearDueBadge;
+    copilotAvailable = detectCopilotCli();
+    var createTaskBtn = document.getElementById("createTaskBtn");
+    createTaskBtn.disabled = !copilotAvailable;
+    createTaskBtn.title = copilotAvailable
+      ? "Create the task through Copilot CLI"
+      : "The Copilot CLI is require for this action";
 
     // Enter submits from the single-line fields (Summary / custom Tags); the
     // Description textarea keeps Enter for newlines.
     var submitOnEnter = function (e) {
       e = e || window.event;
       if (e.keyCode === 13) {
-        submitTask(false);
+        submitTask(true);
         if (e.preventDefault) e.preventDefault();
         return false;
       }
@@ -1421,7 +1728,7 @@
     };
     document.getElementById("taskSummary").onkeydown = submitOnEnter;
     document.getElementById("customTags").onkeydown = submitOnEnter;
-    document.getElementById("taskDue").onkeydown = submitOnEnter;
+    initDuePicker();
 
     ensureWorker();   // spin up the dedicated background shell up front
     beatApp();        // first heartbeat so the worker sees us immediately

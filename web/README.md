@@ -34,10 +34,10 @@ just show them:
     comma-separated tags in the box below (spaces become hyphens, e.g. `Milk
     Tea` &rarr; `milk-tea`).
   - **Description** — details and things to watch while doing the task.
-  - **Due date & time** *(optional)* — an ISO value (`2026-09-05 15:30`) or
-    natural language (`next friday 3pm`, `tomorrow noon`). It is parsed locally
-    and overrides any date the assistant might infer from the text. Leave it
-    empty to let the assistant work out the due date from the summary.
+  - **Due date & time** — choose a date, hour, and minute from the compatible
+    picker. It is passed as an absolute value and overrides any date the
+    assistant might infer from the text. Use **Clear** to leave it empty and
+    let the assistant work out the due date from the summary.
 
   The form has two create buttons:
   - **Create task** — concatenates the fields into a single note (the summary,

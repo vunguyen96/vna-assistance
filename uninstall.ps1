@@ -31,6 +31,9 @@ if (Test-Path $hook) { Remove-Item $hook -Force; Write-Host "removed hook" }
 $lnk = Join-Path ([Environment]::GetFolderPath("Desktop")) "vna-assistance.lnk"
 if (Test-Path $lnk) { Remove-Item $lnk -Force; Write-Host "removed desktop shortcut" }
 
+$startupLnk = Join-Path ([Environment]::GetFolderPath("Startup")) "vna-assistance.lnk"
+if (Test-Path $startupLnk) { Remove-Item $startupLnk -Force; Write-Host "removed startup shortcut" }
+
 if ($PurgeData) {
     $data = $(if ($env:VNA_HOME) { $env:VNA_HOME } else { Join-Path $HOME "vna-assistance" })
     if (Test-Path $data) { Remove-Item $data -Recurse -Force; Write-Host "purged data folder: $data" }

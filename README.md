@@ -23,8 +23,8 @@ No servers. No cloud. No database. Just Python, one CSV, and Windows.
   next 4h, next 12h, upcoming) with collapsible sections, per-card live
   countdowns, a real-time header clock, done/restore/delete, and a due-soon
   notification badge.
-- **Add tasks from the UI** — a form with summary, tags, description, and an
-  optional due date/time. **Create task** routes through Copilot CLI (smart
+- **Add tasks from the UI** — a form with summary, tags, description, and a
+  compatible due date/time picker. **Create task** routes through Copilot CLI (smart
   parsing); **Create simple task** writes directly via the local Python CLI
   (instant, deterministic). Both run in the background with a progress bar.
 - **Copilot CLI integration** — three skills and a sessionStart hook so Copilot
@@ -53,7 +53,60 @@ The installer:
 2. installs the three skills into `%USERPROFILE%\.copilot\skills\`;
 3. installs the sessionStart hook, patched to this repo's path;
 4. installs `dateparser` (best effort);
-5. creates a Desktop shortcut to the viewer.
+5. creates Desktop and Start Menu shortcuts with `web\vna-assistance.ico`;
+6. attempts to pin the viewer to the taskbar;
+7. creates a Windows Startup shortcut so the viewer opens after sign-in.
+
+The installer is the single setup script; run it again after updating the
+repository to recreate the shortcuts and retry the taskbar pin:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+To prevent the viewer from opening automatically when Windows starts:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -NoStartup
+```
+
+The Startup shortcut launches the same visible HTA window as the Desktop
+shortcut. Remove it with `uninstall.ps1`, or delete
+`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\vna-assistance.lnk`.
+
+### Updating Copilot skills and hooks
+
+After changing any file under `copilot\skills\` or `copilot\hooks\`, run the
+same installer again from the repository root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -NoDeps -NoShortcut
+```
+
+This copies the current project files to:
+
+```text
+%USERPROFILE%\.copilot\skills\vna-assistance-note\SKILL.md
+%USERPROFILE%\.copilot\skills\vna-assistance-done\SKILL.md
+%USERPROFILE%\.copilot\skills\vna-assistance-review\SKILL.md
+%USERPROFILE%\.copilot\hooks\vna-assistance-reminder.json
+```
+
+The hook's `__VNA_PROJECT__` placeholder is replaced automatically with the
+current repository path. Restart GitHub Copilot CLI after updating so it
+reloads the skills and hook. Do not run `uninstall.ps1`; reinstalling is
+enough and does not delete your notes.
+
+Windows can disable the `Pin to taskbar` shell command for scripts. If the
+installer reports that automatic pinning was unavailable:
+
+1. Open `vna-assistance.lnk` from the Desktop or Start Menu.
+2. When the viewer appears, find its icon on the taskbar.
+3. Right-click the running viewer icon.
+4. Choose **Pin to taskbar**.
+
+Use the `.lnk` shortcut rather than opening `vna-assistance.hta` directly so
+Windows uses the custom icon and launches it through `mshta.exe`.
 
 Useful flags: `-DataDir <path>`, `-CopilotConfig <path>`, `-NoHook`,
 `-NoShortcut`, `-NoDeps`. Remove everything with `uninstall.ps1`
