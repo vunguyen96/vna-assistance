@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "command": "python vna-assistance-cli.py session-hook",
+        "cwd": "__VNA_PROJECT__",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}
