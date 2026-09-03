@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vna-assistance · Today's tasks</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Tasks</h1>
+        <p id="subtitle" class="muted">vna-assistance · today first, then upcoming</p>
+      </div>
+      <div class="actions">
+        <button id="refreshBtn" type="button" title="Re-read the last chosen file">Refresh</button>
+        <label class="filebtn">
+          Open CSV…
+          <input id="fileInput" type="file" accept=".csv,text/csv" hidden />
+        </label>
+      </div>
+    </header>
+
+    <section id="dropzone" class="dropzone">
+      <p><strong>Drop</strong> <code>vna-assistance.csv</code> here, or click <strong>Open CSV…</strong></p>
+      <p class="muted small">
+        Default location: <code>%USERPROFILE%\vna-assistance\vna-assistance.csv</code>.
+        Tip: copy this folder into that directory and it will auto-load.
+      </p>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+
+    <ul id="list" class="list"></ul>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
